@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workspace">
+<title>Workspace</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d1117;
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 2.5rem 2rem 2rem;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .clock {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    text-align: right;
+    margin-bottom: 3rem;
+    letter-spacing: 1.5px;
+    font-weight: 400;
+  }
+
+  .fields { flex: 1; }
+
+  .row {
+    margin-bottom: 2.5rem;
+    border-left: 2px solid rgba(255,255,255,0.08);
+    padding-left: 1.25rem;
+  }
+  .row.accent {
+    border-left-color: rgba(255,255,255,0.65);
+    margin-bottom: 3rem;
+  }
+  .row-label {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.22);
+    margin-bottom: 7px;
+    text-transform: lowercase;
+  }
+  .row-value {
+    font-size: 24px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.25;
+  }
+  .row-value.secondary {
+    font-size: 19px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+  }
+  .row-value.anchor {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.32);
+    font-style: italic;
+  }
+
+  .footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .updated {
+    font-size: 10px;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 0.5px;
+  }
+  .refresh-btn {
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    background: none;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  .refresh-btn:active { background: rgba(255,255,255,0.06); }
+
+  .loading { color: rgba(255,255,255,0.15); font-size: 13px; text-align: center; padding: 4rem 0; }
+  .error { color: rgba(255,100,100,0.5); font-size: 12px; padding: 1rem 0; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="clock" id="clock">—</div>
+
+<div class="fields" id="content">
+  <div class="loading">Loading…</div>
+</div>
+
+<div class="footer">
+  <div class="updated" id="updated">—</div>
+  <button class="refresh-btn" onclick="loadData()">↻</button>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2MuZoXsMhhXZf2lHr-a6Zov5KayJCODn62IVh38BnDRY5ERr_DIx7uEyS3B-7VI1PDw/exec';
+// ────────────────────────────────────────────────────────
+
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit'
+  });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+async function loadData() {
+  try {
+    const res = await fetch(SCRIPT_URL, { redirect: 'follow' });
+    const state = await res.json();
+
+    if (state.error) throw new Error(state.error);
+
+    document.getElementById('content').innerHTML =
+      '<div class="row accent">' +
+        '<div class="row-value">' + esc(state.now) + '</div>' +
+      '</div>' +
+      '<div class="row">' +
+        '<div class="row-label">part of</div>' +
+        '<div class="row-value secondary">' + esc(state.project) + '</div>' +
+      '</div>' +
+      '<div class="row">' +
+        '<div class="row-label">today</div>' +
+        '<div class="row-value anchor">' + esc(state.north_star) + '</div>' +
+      '</div>';
+
+    document.getElementById('updated').textContent = 'updated ' + state.updated;
+
+  } catch(err) {
+    document.getElementById('content').innerHTML =
+      '<div class="error">Could not load state.<br>' + err.message + '</div>';
+  }
+}
+
+function esc(str) {
+  return (str || '—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
