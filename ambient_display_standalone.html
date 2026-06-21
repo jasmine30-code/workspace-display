@@ -26,7 +26,6 @@
     text-align: right;
     margin-bottom: 3.5rem;
     letter-spacing: 1.5px;
-    font-weight: 400;
   }
 
   .fields { flex: 1; }
@@ -66,6 +65,39 @@
     font-style: italic;
   }
 
+  /* Timer */
+  .timer-wrap {
+    margin: 2.5rem 0 1rem;
+    padding-left: 1.5rem;
+  }
+  .timer-track {
+    height: 5px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .timer-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 30s linear, background-color 3s ease;
+  }
+  .timer-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: clamp(11px, 1.8vw, 16px);
+    color: rgba(255,255,255,0.18);
+    letter-spacing: 0.5px;
+  }
+  .timer-open {
+    font-size: clamp(11px, 1.8vw, 16px);
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 1px;
+    padding-left: 1.5rem;
+    margin-top: 1.5rem;
+    font-style: italic;
+  }
+
   .footer {
     margin-top: auto;
     padding-top: 2rem;
@@ -75,7 +107,7 @@
   }
   .updated {
     font-size: 11px;
-    color: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.1);
     letter-spacing: 0.5px;
   }
   .refresh-btn {
@@ -88,7 +120,6 @@
     cursor: pointer;
   }
   .refresh-btn:active { background: rgba(255,255,255,0.06); }
-
   .loading { color: rgba(255,255,255,0.15); font-size: 16px; text-align: center; padding: 4rem 0; }
   .error { color: rgba(255,100,100,0.5); font-size: 14px; padding: 1rem 0; line-height: 1.6; }
 </style>
@@ -101,6 +132,8 @@
   <div class="loading">Loading…</div>
 </div>
 
+<div id="timer-area"></div>
+
 <div class="footer">
   <div class="updated" id="updated">—</div>
   <button class="refresh-btn" onclick="loadData()">↻</button>
@@ -108,6 +141,8 @@
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2MuZoXsMhhXZf2lHr-a6Zov5KayJCODn62IVh38BnDRY5ERr_DIx7uEyS3B-7VI1PDw/exec';
+
+let currentState = null;
 
 function updateClock() {
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
@@ -118,11 +153,60 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
+// Update timer bar every 30 seconds without refetching
+setInterval(function() {
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}, 30000);
+
+function timerColor(pct) {
+  if (pct < 50) return 'rgba(255,255,255,0.35)';
+  if (pct < 75) return 'rgba(255,185,60,0.65)';
+  return 'rgba(255,90,60,0.75)';
+}
+
+function formatTime(isoStr) {
+  return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function renderTimer(activeEvent, nextEvent) {
+  const area = document.getElementById('timer-area');
+  const now = new Date();
+
+  if (activeEvent) {
+    const start = new Date(activeEvent.start);
+    const end = new Date(activeEvent.end);
+    const total = end - start;
+    const elapsed = now - start;
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const remaining = Math.max(0, Math.round((end - now) / 60000));
+    const color = timerColor(pct);
+
+    area.innerHTML =
+      '<div class="timer-wrap">' +
+        '<div class="timer-track">' +
+          '<div class="timer-fill" id="timer-fill" style="width:' + pct.toFixed(1) + '%;background:' + color + '"></div>' +
+        '</div>' +
+        '<div class="timer-meta">' +
+          '<span>' + esc(activeEvent.title) + '</span>' +
+          '<span>' + (remaining > 0 ? remaining + ' min left' : 'ending') + '</span>' +
+        '</div>' +
+      '</div>';
+  } else if (nextEvent) {
+    const minsUntil = Math.round((new Date(nextEvent.start) - now) / 60000);
+    area.innerHTML =
+      '<div class="timer-open">open time · ' + esc(nextEvent.title) + ' at ' + formatTime(nextEvent.start) + ' (' + minsUntil + ' min)</div>';
+  } else {
+    area.innerHTML = '<div class="timer-open">open time</div>';
+  }
+}
+
 async function loadData() {
   try {
     const res = await fetch(SCRIPT_URL, { redirect: 'follow' });
     const state = await res.json();
     if (state.error) throw new Error(state.error);
+
+    currentState = state;
 
     document.getElementById('content').innerHTML =
       '<div class="row accent">' +
@@ -137,7 +221,9 @@ async function loadData() {
         '<div class="row-value anchor">' + esc(state.north_star) + '</div>' +
       '</div>';
 
+    renderTimer(state.active_event, state.next_event);
     document.getElementById('updated').textContent = 'updated ' + state.updated;
+
   } catch(err) {
     document.getElementById('content').innerHTML =
       '<div class="error">Could not load state.<br>' + err.message + '</div>';
