@@ -19,7 +19,6 @@
     display: flex;
     flex-direction: column;
   }
-
   .clock {
     font-size: 13px;
     color: rgba(255,255,255,0.2);
@@ -27,9 +26,7 @@
     margin-bottom: 3.5rem;
     letter-spacing: 1.5px;
   }
-
   .fields { flex: 1; }
-
   .row {
     margin-bottom: 3rem;
     border-left: 3px solid rgba(255,255,255,0.08);
@@ -65,16 +62,39 @@
     font-style: italic;
   }
 
-  /* Timer */
-  .timer-wrap {
-    margin: 2.5rem 0 1rem;
-    padding-left: 1.5rem;
+  /* Timer container — tappable */
+  .timer-container {
+    margin-top: 2.5rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
+  .timer-container:active { opacity: 0.7; }
+
+  /* Mode dots */
+  .mode-dots {
+    display: flex;
+    gap: 6px;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .mode-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+  }
+  .mode-dot.active { background: rgba(255,255,255,0.4); }
+
+  /* Bar mode */
   .timer-track {
     height: 24px;
     background: rgba(255,255,255,0.06);
-    border-radius: 3px;
+    border-radius: 12px;
     overflow: hidden;
+    margin-bottom: 10px;
   }
   .timer-fill {
     height: 100%;
@@ -84,18 +104,86 @@
   .timer-meta {
     display: flex;
     justify-content: space-between;
-    margin-top: 8px;
-    font-size: clamp(11px, 1.8vw, 16px);
-    color: rgba(255,255,255,0.18);
+    font-size: clamp(12px, 2vw, 18px);
+    color: rgba(255,255,255,0.25);
     letter-spacing: 0.5px;
   }
+
+  /* Countdown / count-up mode */
+  .timer-number {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .timer-big {
+    font-size: clamp(64px, 14vw, 120px);
+    font-weight: 300;
+    line-height: 1;
+  }
+  .timer-unit {
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 400;
+    color: rgba(255,255,255,0.3);
+  }
+  .timer-sublabel {
+    font-size: clamp(12px, 2vw, 18px);
+    color: rgba(255,255,255,0.2);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Pomodoro dual-clock */
+  .pomo-dual {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+  }
+  .pomo-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .pomo-clock.receded { opacity: 0.2; transform: scale(0.68); }
+  .pomo-clk-label {
+    font-size: clamp(11px, 1.8vw, 15px);
+    color: rgba(255,255,255,0.28);
+    letter-spacing: 1px;
+  }
+  .pomo-clk-sub {
+    font-size: clamp(10px, 1.5vw, 13px);
+    color: rgba(255,255,255,0.14);
+  }
+  .pomo-footer {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pomo-blocks {
+    font-size: clamp(10px, 1.5vw, 13px);
+    color: rgba(255,255,255,0.16);
+    letter-spacing: 0.5px;
+  }
+  .pomo-reset {
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.18);
+    background: none;
+  }
+
+  /* Open time / off */
   .timer-open {
-    font-size: clamp(11px, 1.8vw, 16px);
+    font-size: clamp(12px, 2vw, 18px);
     color: rgba(255,255,255,0.12);
     letter-spacing: 1px;
-    padding-left: 1.5rem;
-    margin-top: 1.5rem;
     font-style: italic;
+    padding-top: 0.5rem;
   }
 
   .footer {
@@ -122,41 +210,211 @@
   .refresh-btn:active { background: rgba(255,255,255,0.06); }
   .loading { color: rgba(255,255,255,0.15); font-size: 16px; text-align: center; padding: 4rem 0; }
   .error { color: rgba(255,100,100,0.5); font-size: 14px; padding: 1rem 0; line-height: 1.6; }
+
+  /* Setup overlay */
+  .setup-overlay {
+    position: fixed; inset: 0;
+    background: #0d1117;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 999;
+    padding: 2.5rem;
+  }
+  .setup-overlay h2 {
+    font-size: 18px; font-weight: 400;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+  .setup-overlay p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 2.5rem;
+    text-align: center;
+    max-width: 340px;
+    line-height: 1.6;
+  }
+  .setup-overlay input {
+    width: 100%; max-width: 400px;
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    padding: 12px 16px;
+    margin-bottom: 1rem;
+    outline: none;
+    font-family: inherit;
+  }
+  .setup-overlay input:focus {
+    border-color: rgba(255,255,255,0.35);
+  }
+  .setup-overlay button.save-btn {
+    width: 100%; max-width: 400px;
+    background: rgba(255,255,255,0.08);
+    border: 0.5px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    padding: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 0.5rem;
+  }
+  .setup-overlay button.save-btn:active { background: rgba(255,255,255,0.14); }
+
+  /* Settings gear */
+  .settings-btn {
+    font-size: 13px;
+    color: rgba(255,255,255,0.12);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    margin-left: 8px;
+  }
+  .settings-btn:active { color: rgba(255,255,255,0.4); }
 </style>
 </head>
 <body>
 
 <div class="clock" id="clock">—</div>
-
-<div class="fields" id="content">
-  <div class="loading">Loading…</div>
+<div class="fields" id="content"><div class="loading">Loading…</div></div>
+<div class="timer-container" id="timer-container" onclick="cycleMode()">
+  <div class="mode-dots" id="mode-dots"></div>
+  <div id="timer-area"></div>
 </div>
-
-<div id="timer-area"></div>
+<!-- Setup overlay (hidden by default, shown when no script URL stored) -->
+<div class="setup-overlay" id="setup-overlay" style="display:none">
+  <h2>workspace display</h2>
+  <p>Paste your Apps Script URL to connect this display to your Google Calendar.</p>
+  <input type="url" id="setup-url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+  <button class="save-btn" onclick="saveSetup()">Connect</button>
+</div>
 
 <div class="footer">
   <div class="updated" id="updated">—</div>
-  <button class="refresh-btn" onclick="loadData()">↻</button>
+  <span>
+    <button class="refresh-btn" onclick="loadData()">↻</button>
+    <button class="settings-btn" onclick="showSetup()" title="Settings">⚙</button>
+  </span>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2MuZoXsMhhXZf2lHr-a6Zov5KayJCODn62IVh38BnDRY5ERr_DIx7uEyS3B-7VI1PDw/exec';
+// Script URL loaded from localStorage — set once per device via setup overlay
+let SCRIPT_URL = localStorage.getItem('scriptUrl') || '';
 
-let currentState = null;
-
-function updateClock() {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: '2-digit'
-  });
+function showSetup() {
+  const overlay = document.getElementById('setup-overlay');
+  const input = document.getElementById('setup-url');
+  input.value = SCRIPT_URL;
+  overlay.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
 }
-updateClock();
-setInterval(updateClock, 1000);
 
-// Update timer bar every 30 seconds without refetching
-setInterval(function() {
+function saveSetup() {
+  const url = document.getElementById('setup-url').value.trim();
+  if (!url || !url.startsWith('https://')) {
+    document.getElementById('setup-url').style.borderColor = 'rgba(255,100,100,0.5)';
+    return;
+  }
+  localStorage.setItem('scriptUrl', url);
+  SCRIPT_URL = url;
+  document.getElementById('setup-overlay').style.display = 'none';
+  loadData();
+}
+
+// Show setup on first load if no URL stored
+if (!SCRIPT_URL) {
+  document.addEventListener('DOMContentLoaded', showSetup);
+}
+const MODES = ['bar', 'countdown', 'countup', 'pomo', 'off'];
+let pomoWorkMin = parseInt(localStorage.getItem('pomoWorkMin') || '25');
+let WORK_MS = pomoWorkMin * 60 * 1000;
+let pomoMidpointEnabled = localStorage.getItem('pomoMidpoint') === 'true';
+let pomoMidpointOverridden = false;
+let currentState = null;
+let mode = localStorage.getItem('timerMode') || 'bar';
+let showSec = localStorage.getItem('showSec') === 'true';
+
+function cycleMode() {
+  const idx = MODES.indexOf(mode);
+  mode = MODES[(idx + 1) % MODES.length];
+  localStorage.setItem('timerMode', mode);
   if (currentState) renderTimer(currentState.active_event, currentState.next_event);
-}, 30000);
+}
+
+function toggleSec(e) {
+  e.stopPropagation();
+  showSec = !showSec;
+  localStorage.setItem('showSec', showSec);
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}
+
+function secPill() {
+  return '<span onclick="toggleSec(event)" style="display:inline-block;margin-top:10px;font-size:11px;letter-spacing:1px;padding:3px 10px;border-radius:20px;cursor:pointer;border:0.5px solid ' + (showSec ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)') + ';color:' + (showSec ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)') + '">sec ' + (showSec ? 'on' : 'off') + '</span>';
+}
+
+function pomoPiePath(cx, cy, r, pct) {
+  const rem = 1 - pct;
+  if (rem <= 0.001) return '';
+  if (rem >= 0.999) return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="currentColor"/>';
+  const angle = -Math.PI / 2 + rem * 2 * Math.PI;
+  const x = cx + r * Math.cos(angle);
+  const y = cy + r * Math.sin(angle);
+  const large = rem > 0.5 ? 1 : 0;
+  return '<path d="M '+cx+' '+cy+' L '+cx+' '+(cy-r)+' A '+r+' '+r+' 0 '+large+' 1 '+x.toFixed(2)+' '+y.toFixed(2)+' Z" fill="currentColor"/>';
+}
+
+function pomoClockSVG(pct, color, label, size) {
+  const s = size || 110;
+  const cx = s/2, cy = s/2, r = s/2 - 8;
+  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 '+s+' '+s+'" style="pointer-events:none">' +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="rgba(255,255,255,0.04)"/>' +
+    '<g style="color:'+color+'">'+pomoPiePath(cx,cy,r,pct)+'</g>' +
+    '<text x="'+cx+'" y="'+(cy+8)+'" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-size="'+(s===110?'24':'20')+'" font-family="-apple-system,sans-serif" font-weight="300">'+label+'</text>' +
+    '</svg>';
+}
+
+function resetPomo(e) {
+  e.stopPropagation();
+  localStorage.setItem('pomoPhase', 'work');
+  localStorage.setItem('pomoPhaseStart', String(Date.now()));
+  pomoMidpointOverridden = false;
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}
+
+function wakeFromIdle(e) {
+  e.stopPropagation();
+  pomoMidpointOverridden = true;
+  // Resume clock from exactly the midpoint
+  localStorage.setItem('pomoPhaseStart', String(Date.now() - Math.floor(WORK_MS / 2)));
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}
+
+function toggleMidpoint(e) {
+  e.stopPropagation();
+  pomoMidpointEnabled = !pomoMidpointEnabled;
+  localStorage.setItem('pomoMidpoint', String(pomoMidpointEnabled));
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}
+
+function togglePomoWork(e) {
+  e.stopPropagation();
+  pomoWorkMin = pomoWorkMin === 25 ? 50 : 25;
+  WORK_MS = pomoWorkMin * 60 * 1000;
+  localStorage.setItem('pomoWorkMin', String(pomoWorkMin));
+  localStorage.setItem('pomoPhase', 'work');
+  localStorage.setItem('pomoPhaseStart', String(Date.now()));
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}
+
+function getRestMs(blocks) {
+  const long = blocks > 0 && blocks % 4 === 0;
+  if (pomoWorkMin === 50) return (long ? 30 : 10) * 60 * 1000;
+  return (long ? 20 : 5) * 60 * 1000;
+}
+function getPhaseDur(phase, blocks) { return phase === 'work' ? WORK_MS : getRestMs(blocks); }
 
 function timerColor(pct) {
   if (pct < 50) return 'rgba(255,255,255,0.35)';
@@ -168,65 +426,186 @@ function formatTime(isoStr) {
   return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
+function updateDots() {
+  const idx = MODES.indexOf(mode);
+  document.getElementById('mode-dots').innerHTML = MODES.map(function(m, i) {
+    return '<div class="mode-dot' + (i === idx ? ' active' : '') + '"></div>';
+  }).join('');
+}
+
 function renderTimer(activeEvent, nextEvent) {
   const area = document.getElementById('timer-area');
   const now = new Date();
+  updateDots();
 
-  if (activeEvent) {
-    const start = new Date(activeEvent.start);
-    const end = new Date(activeEvent.end);
-    const total = end - start;
-    const elapsed = now - start;
-    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
-    const remaining = Math.max(0, Math.round((end - now) / 60000));
-    const color = timerColor(pct);
+  if (mode === 'off') {
+    area.innerHTML = '<div class="timer-open" style="text-align:right;padding-right:0.5rem;">timer off · tap to turn on</div>';
+    return;
+  }
+
+  const hasBlock = activeEvent && new Date(activeEvent.start) <= now && new Date(activeEvent.end) >= now;
+  const start = hasBlock ? new Date(activeEvent.start) : null;
+  const end = hasBlock ? new Date(activeEvent.end) : null;
+  const total = hasBlock ? (end - start) : 0;
+  const elapsed = hasBlock ? (now - start) : 0;
+  const pct = hasBlock ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
+  const remainMs = hasBlock ? Math.max(0, end - now) : 0;
+  const remaining = Math.floor(remainMs / 60000);
+  const remainSec = Math.floor((remainMs % 60000) / 1000);
+  const elapsedMin = hasBlock ? Math.floor(elapsed / 60000) : 0;
+  const elapsedSec = hasBlock ? Math.floor((elapsed % 60000) / 1000) : 0;
+  const color = timerColor(pct);
+
+  if (mode === 'bar') {
+    if (hasBlock) {
+      area.innerHTML =
+        '<div class="timer-track"><div class="timer-fill" style="width:' + pct.toFixed(1) + '%;background:' + color + '"></div></div>' +
+        '<div class="timer-meta"><span>' + esc(activeEvent.title) + '</span><span>' + (remaining > 0 ? remaining + ' min left' : 'ending') + '</span></div>';
+    } else if (nextEvent) {
+      const mu = Math.max(0, Math.round((new Date(nextEvent.start) - now) / 60000));
+      const bp = Math.min(100, Math.max(0, ((60 - mu) / 60) * 100));
+      const bc = mu > 30 ? 'rgba(255,255,255,0.18)' : mu > 10 ? 'rgba(255,185,60,0.5)' : 'rgba(255,90,60,0.6)';
+      area.innerHTML = '<div class="timer-track"><div class="timer-fill" style="width:' + bp.toFixed(1) + '%;background:' + bc + '"></div></div>' +
+        '<div class="timer-meta"><span>open time</span><span>' + esc(nextEvent.title) + ' in ' + mu + ' min</span></div>';
+    } else {
+      area.innerHTML = '<div class="timer-open">open time</div>';
+    }
+
+  } else if (mode === 'countdown') {
+    if (hasBlock) {
+      const cdNum = showSec
+        ? '<span class="timer-big" style="color:' + color + '">' + remaining + '</span><span style="font-size:clamp(28px,5vw,50px);font-weight:300;color:' + color + ';opacity:0.6">:' + String(remainSec).padStart(2,'0') + '</span>'
+        : '<span class="timer-big" style="color:' + color + '">' + remaining + '</span>';
+      area.innerHTML =
+        '<div class="timer-number">' + cdNum + '<span class="timer-unit">min left</span></div>' +
+        '<div class="timer-sublabel">' + esc(activeEvent.title) + ' · ends ' + formatTime(activeEvent.end) + '</div>' +
+        secPill();
+    } else if (nextEvent) {
+      const mu = Math.max(0, Math.round((new Date(nextEvent.start) - now) / 60000));
+      area.innerHTML =
+        '<div class="timer-number"><span class="timer-big" style="color:rgba(255,255,255,0.35)">' + mu + '</span><span class="timer-unit" style="color:rgba(255,255,255,0.2)">min until</span></div>' +
+        '<div class="timer-sublabel">' + esc(nextEvent.title) + ' · ' + formatTime(nextEvent.start) + '</div>';
+    } else {
+      area.innerHTML = '<div class="timer-open">open time</div>';
+    }
+
+  } else if (mode === 'countup') {
+    if (hasBlock) {
+      const cuNum = showSec
+        ? '<span class="timer-big" style="color:rgba(255,255,255,0.6)">' + elapsedMin + '</span><span style="font-size:clamp(28px,5vw,50px);font-weight:300;color:rgba(255,255,255,0.3)">:' + String(elapsedSec).padStart(2,'0') + '</span>'
+        : '<span class="timer-big" style="color:rgba(255,255,255,0.6)">' + elapsedMin + '</span>';
+      area.innerHTML =
+        '<div class="timer-number">' + cuNum + '</div>' +
+        '<div class="timer-sublabel">' + esc(activeEvent.title) + ' · started ' + formatTime(activeEvent.start) + '</div>' +
+        secPill();
+    } else {
+      const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const parts = timeStr.replace(' AM','').replace(' PM','').split(':');
+      const ampm = timeStr.includes('PM') ? 'pm' : 'am';
+      area.innerHTML =
+        '<div class="timer-number"><span class="timer-big" style="color:rgba(255,255,255,0.45)">' + parts[0] + '</span><span style="font-size:clamp(28px,5vw,50px);font-weight:300;color:rgba(255,255,255,0.25)">:' + parts[1] + '</span><span class="timer-unit" style="color:rgba(255,255,255,0.18)">' + ampm + '</span></div>' +
+        '<div class="timer-sublabel">open time' + (nextEvent ? ' · ' + esc(nextEvent.title) + ' at ' + formatTime(nextEvent.start) : '') + '</div>';
+    }
+
+  } else if (mode === 'pomo') {
+    const today = now.toISOString().slice(0, 10);
+    const blocksKey = 'pomoBlocks_' + today;
+    let blocks = parseInt(localStorage.getItem(blocksKey) || '0');
+    let phase = localStorage.getItem('pomoPhase') || 'work';
+    let phaseStart = parseInt(localStorage.getItem('pomoPhaseStart') || String(now.getTime()));
+    const nowMs = now.getTime();
+
+    if (new Date(phaseStart).toISOString().slice(0, 10) !== today) {
+      phase = 'work'; phaseStart = nowMs;
+      localStorage.setItem('pomoPhase', phase);
+      localStorage.setItem('pomoPhaseStart', String(phaseStart));
+    }
+
+    let elapsedP = Math.max(0, nowMs - phaseStart);
+    let safety = 0;
+    while (elapsedP >= getPhaseDur(phase, blocks) && safety++ < 100) {
+      const dur = getPhaseDur(phase, blocks);
+      elapsedP -= dur; phaseStart += dur;
+      if (phase === 'work') { blocks++; localStorage.setItem(blocksKey, String(blocks)); phase = 'rest'; }
+      else { phase = 'work'; pomoMidpointOverridden = false; }
+      localStorage.setItem('pomoPhase', phase);
+      localStorage.setItem('pomoPhaseStart', String(phaseStart));
+    }
+
+    const curDur = getPhaseDur(phase, blocks);
+    const isLong = phase === 'rest' && blocks > 0 && blocks % 4 === 0;
+    const workPct = phase === 'work' ? Math.min(1, elapsedP / WORK_MS) : 1;
+    const restPct = phase === 'rest' ? Math.min(1, elapsedP / curDur) : 0;
+    const workRemain = phase === 'work' ? Math.ceil((WORK_MS - elapsedP) / 60000) : 0;
+    const restTotal = isLong ? 20 : 5;
+    const restRemain = phase === 'rest' ? Math.ceil((curDur - elapsedP) / 60000) : restTotal;
+    const workActive = phase === 'work';
+    const atMidpoint = workActive && elapsedP >= WORK_MS / 2 && pomoMidpointEnabled && !pomoMidpointOverridden;
+    const displayElapsed = atMidpoint ? WORK_MS / 2 : elapsedP;
+    const workPctDisplay = phase === 'work' ? Math.min(1, displayElapsed / WORK_MS) : 1;
+    const workRemainDisplay = phase === 'work' ? Math.ceil((WORK_MS - displayElapsed) / 60000) : 0;
+    const workColor = atMidpoint
+      ? 'rgba(30,45,120,0.45)'
+      : (workPctDisplay < 0.6 ? 'rgba(255,255,255,0.42)' : workPctDisplay < 0.85 ? 'rgba(255,185,60,0.7)' : 'rgba(255,90,60,0.82)');
+    const restColor = isLong ? 'rgba(76,201,160,0.92)' : 'rgba(76,201,160,0.62)';
+    const workWrapClick = atMidpoint ? ' onclick="wakeFromIdle(event)" style="cursor:pointer"' : '';
+    const workLabel = atMidpoint ? 'idle · tap to wake' : 'work';
+    const midpointPill = '<button class="pomo-reset" onclick="toggleMidpoint(event)" style="' + (pomoMidpointEnabled ? 'border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.45)' : '') + '">midpoint idle ' + (pomoMidpointEnabled ? 'on' : 'off') + '</button>';
 
     area.innerHTML =
-      '<div class="timer-wrap">' +
-        '<div class="timer-track">' +
-          '<div class="timer-fill" id="timer-fill" style="width:' + pct.toFixed(1) + '%;background:' + color + '"></div>' +
+      '<div class="pomo-dual">' +
+        '<div class="pomo-clock' + (workActive ? '' : ' receded') + '"' + workWrapClick + '>' +
+          pomoClockSVG(workPctDisplay, workColor, workActive ? workRemainDisplay : '—', 110) +
+          '<div class="pomo-clk-label">' + workLabel + '</div>' +
+          '<div class="pomo-clk-sub" onclick="togglePomoWork(event)" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;">' + pomoWorkMin + ' min</div>' +
         '</div>' +
-        '<div class="timer-meta">' +
-          '<span>' + esc(activeEvent.title) + '</span>' +
-          '<span>' + (remaining > 0 ? remaining + ' min left' : 'ending') + '</span>' +
+        '<div class="pomo-clock' + (!workActive ? '' : ' receded') + '">' +
+          pomoClockSVG(restPct, restColor, !workActive ? restRemain : restTotal, isLong ? 130 : 110) +
+          '<div class="pomo-clk-label">' + (isLong ? 'long rest' : 'rest') + '</div>' +
+          '<div class="pomo-clk-sub">' + (isLong ? '30 min · earned' : (pomoWorkMin === 50 ? '10 min' : '5 min')) + '</div>' +
         '</div>' +
+      '</div>' +
+      '<div class="pomo-footer">' +
+        '<div class="pomo-blocks">' + blocks + ' block' + (blocks !== 1 ? 's' : '') + ' today</div>' +
+        '<div style="display:flex;gap:8px">' + midpointPill + '<button class="pomo-reset" onclick="resetPomo(event)">reset</button></div>' +
       '</div>';
-  } else if (nextEvent) {
-    const minsUntil = Math.round((new Date(nextEvent.start) - now) / 60000);
-    area.innerHTML =
-      '<div class="timer-open">open time · ' + esc(nextEvent.title) + ' at ' + formatTime(nextEvent.start) + ' (' + minsUntil + ' min)</div>';
-  } else {
-    area.innerHTML = '<div class="timer-open">open time</div>';
   }
 }
 
+function openTimeHTML(nextEvent, now) {
+  if (nextEvent) {
+    const minsUntil = Math.round((new Date(nextEvent.start) - now) / 60000);
+    return '<div class="timer-open">open time · ' + esc(nextEvent.title) + ' at ' + formatTime(nextEvent.start) + ' (' + minsUntil + ' min)</div>';
+  }
+  return '<div class="timer-open">open time</div>';
+}
+
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+  });
+}
+updateClock();
+setInterval(updateClock, 1000);
+setInterval(function() {
+  if (currentState) renderTimer(currentState.active_event, currentState.next_event);
+}, 1000);
+
 async function loadData() {
+  if (!SCRIPT_URL) { showSetup(); return; }
   try {
     const res = await fetch(SCRIPT_URL, { redirect: 'follow' });
     const state = await res.json();
     if (state.error) throw new Error(state.error);
-
     currentState = state;
-
     document.getElementById('content').innerHTML =
-      '<div class="row accent">' +
-        '<div class="row-value">' + esc(state.now) + '</div>' +
-      '</div>' +
-      '<div class="row">' +
-        '<div class="row-label">part of</div>' +
-        '<div class="row-value secondary">' + esc(state.project) + '</div>' +
-      '</div>' +
-      '<div class="row">' +
-        '<div class="row-label">today</div>' +
-        '<div class="row-value anchor">' + esc(state.north_star) + '</div>' +
-      '</div>';
-
+      '<div class="row accent"><div class="row-value">' + esc(state.now) + '</div></div>' +
+      '<div class="row"><div class="row-label">part of</div><div class="row-value secondary">' + esc(state.project) + '</div></div>' +
+      '<div class="row"><div class="row-label">today</div><div class="row-value anchor">' + esc(state.north_star) + '</div></div>';
     renderTimer(state.active_event, state.next_event);
     document.getElementById('updated').textContent = 'updated ' + state.updated;
-
   } catch(err) {
-    document.getElementById('content').innerHTML =
-      '<div class="error">Could not load state.<br>' + err.message + '</div>';
+    document.getElementById('content').innerHTML = '<div class="error">Could not load state.<br>' + err.message + '</div>';
   }
 }
 
